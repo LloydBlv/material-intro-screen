@@ -51,15 +51,14 @@
                 android:src="@drawable/ic_previous"
                 android:visibility="invisible" />
 
-            <ImageButton
+            <Button
                 android:id="@+id/button_skip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:layout_marginLeft="16dp"
-                android:background="@drawable/button_background"
+                android:background="?selectableItemBackground"
                 android:padding="16dp"
-                android:src="@drawable/ic_skip"
                 android:visibility="gone" />
 
             <agency.tango.materialintroscreen.widgets.InkPageIndicator
@@ -86,6 +85,8 @@
                 android:src="@drawable/ic_next" />
         </LinearLayout>
     </LinearLayout>
+
+
 
 </android.support.design.widget.CoordinatorLayout>
 

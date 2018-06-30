@@ -18,7 +18,7 @@ public class ParallaxScrollListener implements IPageScrolledListener {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void pageScrolled(int position, float offset) {
-        if (position != adapter.getCount()) {
+        if (position > 0 && adapter != null && adapter.getCount() > 0 && position != adapter.getCount() ) {
             Fragment fragment = adapter.getItem(position);
             Fragment fragmentNext = getNextFragment(position);
 

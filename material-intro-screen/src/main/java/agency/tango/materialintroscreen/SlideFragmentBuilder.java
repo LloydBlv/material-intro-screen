@@ -5,20 +5,33 @@ import android.support.annotation.DrawableRes;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SlideFragmentBuilder {
+    int backgroundColorResId;
     int backgroundColor;
+    int buttonsColorResId;
     int buttonsColor;
     String title;
     String description;
     String[] neededPermissions;
     String[] possiblePermissions;
-    int image;
+    int imageResId;
+    String  imageUrl;
 
-    public SlideFragmentBuilder backgroundColor(@ColorRes int backgroundColor) {
+    public SlideFragmentBuilder backgroundColorResId(@ColorRes int backgroundColor) {
+        this.backgroundColorResId = backgroundColor;
+        return this;
+    }
+
+    public SlideFragmentBuilder backgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
         return this;
     }
 
-    public SlideFragmentBuilder buttonsColor(@ColorRes int buttonsColor) {
+    public SlideFragmentBuilder buttonsColorResId(@ColorRes int buttonsColor) {
+        this.buttonsColorResId = buttonsColor;
+        return this;
+    }
+
+    public SlideFragmentBuilder buttonsColor(int buttonsColor) {
         this.buttonsColor = buttonsColor;
         return this;
     }
@@ -44,7 +57,11 @@ public class SlideFragmentBuilder {
     }
 
     public SlideFragmentBuilder image(@DrawableRes int image) {
-        this.image = image;
+        this.imageResId = image;
+        return this;
+    }
+    public SlideFragmentBuilder image(String imageUrl) {
+        this.imageUrl = imageUrl;
         return this;
     }
 
