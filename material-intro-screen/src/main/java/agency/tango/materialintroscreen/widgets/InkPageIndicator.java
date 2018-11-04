@@ -13,13 +13,13 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.CustomViewPager;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import androidx.core.view.ViewCompat;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import androidx.viewpager.widget.CustomViewPager;
 import java.util.Arrays;
 
 import agency.tango.materialintroscreen.R;

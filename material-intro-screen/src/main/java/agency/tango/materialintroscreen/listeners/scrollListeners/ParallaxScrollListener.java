@@ -1,12 +1,12 @@
 package agency.tango.materialintroscreen.listeners.scrollListeners;
 
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import androidx.annotation.Nullable;
 
 import agency.tango.materialintroscreen.SlideFragment;
 import agency.tango.materialintroscreen.adapter.SlidesAdapter;
 import agency.tango.materialintroscreen.listeners.IPageScrolledListener;
 import agency.tango.materialintroscreen.parallax.Parallaxable;
+import androidx.fragment.app.Fragment;
 
 public class ParallaxScrollListener implements IPageScrolledListener {
     private SlidesAdapter adapter;
