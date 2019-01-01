@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -459,7 +460,7 @@ public abstract class MaterialIntroActivity extends AppCompatActivity {
     private void tintButtons(ColorStateList color) {
       ViewCompat.setBackgroundTintList(nextButton, color);
       ViewCompat.setBackgroundTintList(backButton, color);
-      ViewCompat.setBackgroundTintList(skipButton, color);
+      //ViewCompat.setBackgroundTintList(skipButton, color);
     }
   }
 
