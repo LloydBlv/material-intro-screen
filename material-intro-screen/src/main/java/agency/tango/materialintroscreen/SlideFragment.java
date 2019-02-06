@@ -13,6 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -155,6 +157,8 @@ public class SlideFragment extends ParallaxFragment {
     } else if (!TextUtils.isEmpty(imageUrl)) {
       Glide.with(this).load(imageUrl)
           //.apply(RequestOptions.centerCropTransform().error(new ColorDrawable(Color.RED)).placeholder(new ColorDrawable(Color.GRAY)))
+          .apply(RequestOptions.centerInsideTransform())
+          .transition(DrawableTransitionOptions.withCrossFade())
           .into(imageView);
     }
   }
