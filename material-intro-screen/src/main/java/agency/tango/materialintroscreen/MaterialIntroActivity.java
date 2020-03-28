@@ -1,5 +1,7 @@
 package agency.tango.materialintroscreen;
 
+import static android.view.View.GONE;
+
 import agency.tango.materialintroscreen.adapter.SlidesAdapter;
 import agency.tango.materialintroscreen.animations.ViewTranslationWrapper;
 import agency.tango.materialintroscreen.animations.wrappers.BackButtonTranslationWrapper;
@@ -20,18 +22,19 @@ import agency.tango.materialintroscreen.widgets.SwipeableViewPager;
 import android.animation.ArgbEvaluator;
 import android.content.res.ColorStateList;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-//import android.support.design.widget.CoordinatorLayout;
-//import android.support.design.widget.Snackbar;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnApplyWindowInsetsListener;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,438 +43,509 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import com.google.android.material.snackbar.Snackbar;
 
-import static android.view.View.GONE;
+//import android.support.design.widget.CoordinatorLayout;
+//import android.support.design.widget.Snackbar;
 
 public abstract class MaterialIntroActivity extends AppCompatActivity {
-  public SwipeableViewPager viewPager;
-  private InkPageIndicator pageIndicator;
-  private SlidesAdapter adapter;
-  public ImageButton backButton;
-  public Button skipButton;
-  //private ImageButton skipButton;
-  private ImageButton nextButton;
-  private CoordinatorLayout coordinatorLayout;
-  public Button messageButton;
-  private LinearLayout navigationView;
-  private OverScrollViewPager overScrollLayout;
 
-  private ArgbEvaluator argbEvaluator = new ArgbEvaluator();
+    public SwipeableViewPager viewPager;
 
-  private ViewTranslationWrapper nextButtonTranslationWrapper;
-  private ViewTranslationWrapper backButtonTranslationWrapper;
-  private ViewTranslationWrapper pageIndicatorTranslationWrapper;
-  private ViewTranslationWrapper viewPagerTranslationWrapper;
-  private ViewTranslationWrapper skipButtonTranslationWrapper;
+    private InkPageIndicator pageIndicator;
 
-  private MessageButtonBehaviourOnPageSelected messageButtonBehaviourOnPageSelected;
+    private SlidesAdapter adapter;
 
-  private View.OnClickListener permissionNotGrantedClickListener;
-  private View.OnClickListener finishScreenClickListener;
+    public ImageButton backButton;
 
-  private SparseArray<MessageButtonBehaviour> messageButtonBehaviours = new SparseArray<>();
+    public Button skipButton;
 
-  @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    //private ImageButton skipButton;
+    private ImageButton nextButton;
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      Window window = getWindow();
-      window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-          WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    private CoordinatorLayout coordinatorLayout;
+
+    public Button messageButton;
+
+    private LinearLayout navigationView;
+
+    private OverScrollViewPager overScrollLayout;
+
+    private ArgbEvaluator argbEvaluator = new ArgbEvaluator();
+
+    private ViewTranslationWrapper nextButtonTranslationWrapper;
+
+    private ViewTranslationWrapper backButtonTranslationWrapper;
+
+    private ViewTranslationWrapper pageIndicatorTranslationWrapper;
+
+    private ViewTranslationWrapper viewPagerTranslationWrapper;
+
+    private ViewTranslationWrapper skipButtonTranslationWrapper;
+
+    private MessageButtonBehaviourOnPageSelected messageButtonBehaviourOnPageSelected;
+
+    private View.OnClickListener permissionNotGrantedClickListener;
+
+    private View.OnClickListener finishScreenClickListener;
+
+    private SparseArray<MessageButtonBehaviour> messageButtonBehaviours = new SparseArray<>();
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+
+        setContentView(R.layout.activity_material_intro);
+
+        overScrollLayout = (OverScrollViewPager) findViewById(R.id.view_pager_slides);
+        viewPager = overScrollLayout.getOverScrollView();
+        pageIndicator = (InkPageIndicator) findViewById(R.id.indicator);
+        backButton = (ImageButton) findViewById(R.id.button_back);
+        nextButton = (ImageButton) findViewById(R.id.button_next);
+        skipButton = findViewById(R.id.button_skip);
+        messageButton = (Button) findViewById(R.id.button_message);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout_slide);
+        navigationView = (LinearLayout) findViewById(R.id.navigation_view);
+
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+//            coordinatorLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+            getWindow().getDecorView().setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(final View v, final WindowInsets insets) {
+                    final CoordinatorLayout.LayoutParams layoutParams = ((CoordinatorLayout.LayoutParams) navigationView
+                            .getLayoutParams());
+                    layoutParams.bottomMargin = insets.getSystemWindowInsetBottom();
+                    navigationView.setLayoutParams(layoutParams);
+
+//                    final CoordinatorLayout.LayoutParams viewPagerLayoutParams = ((CoordinatorLayout.LayoutParams) overScrollLayout
+//                            .getLayoutParams());
+//                    viewPagerLayoutParams.topMargin = insets.getSystemWindowInsetTop();
+//                    overScrollLayout.setLayoutParams(viewPagerLayoutParams);
+
+
+                    return insets;
+                }
+            });
+        }
+        adapter = new SlidesAdapter(getSupportFragmentManager());
+
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(2);
+        pageIndicator.setViewPager(viewPager);
+
+        nextButtonTranslationWrapper = new NextButtonTranslationWrapper(nextButton);
+        initOnPageChangeListeners();
+
+        permissionNotGrantedClickListener =
+                new PermissionNotGrantedClickListener(this, nextButtonTranslationWrapper);
+        finishScreenClickListener = new FinishScreenClickListener();
+
+        setBackButtonVisible();
+
+        viewPager.post(new Runnable() {
+            @Override
+            public void run() {
+                if (adapter.getCount() == 0) {
+                    //finish();
+                } else {
+                    initViewPager();
+                }
+            }
+        });
     }
 
-    setContentView(R.layout.activity_material_intro);
-
-    overScrollLayout = (OverScrollViewPager) findViewById(R.id.view_pager_slides);
-    viewPager = overScrollLayout.getOverScrollView();
-    pageIndicator = (InkPageIndicator) findViewById(R.id.indicator);
-    backButton = (ImageButton) findViewById(R.id.button_back);
-    nextButton = (ImageButton) findViewById(R.id.button_next);
-    skipButton = findViewById(R.id.button_skip);
-    messageButton = (Button) findViewById(R.id.button_message);
-    coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout_slide);
-    navigationView = (LinearLayout) findViewById(R.id.navigation_view);
-
-    adapter = new SlidesAdapter(getSupportFragmentManager());
-
-    viewPager.setAdapter(adapter);
-    viewPager.setOffscreenPageLimit(2);
-    pageIndicator.setViewPager(viewPager);
-
-    nextButtonTranslationWrapper = new NextButtonTranslationWrapper(nextButton);
-    initOnPageChangeListeners();
-
-    permissionNotGrantedClickListener =
-        new PermissionNotGrantedClickListener(this, nextButtonTranslationWrapper);
-    finishScreenClickListener = new FinishScreenClickListener();
-
-    setBackButtonVisible();
-
-    viewPager.post(new Runnable() {
-      @Override public void run() {
-        if (adapter.getCount() == 0) {
-          //finish();
-        } else {
-          initViewPager();
-        }
-      }
-    });
-  }
-
-  public void initViewPager() {
-    int currentItem = viewPager.getCurrentItem();
-    messageButtonBehaviourOnPageSelected.pageSelected(currentItem);
-    nextButtonBehaviour(currentItem, adapter.getItem(currentItem));
-  }
-
-  @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-      @NonNull int[] grantResults) {
-    SlideFragment fragment = adapter.getItem(viewPager.getCurrentItem());
-    boolean hasPermissionToGrant = fragment.hasNeededPermissionsToGrant();
-    if (!hasPermissionToGrant) {
-      viewPager.setSwipingRightAllowed(true);
-      nextButtonBehaviour(viewPager.getCurrentItem(), fragment);
-      messageButtonBehaviourOnPageSelected.pageSelected(viewPager.getCurrentItem());
-    } else {
-      showPermissionsNotGrantedError();
+    public void initViewPager() {
+        int currentItem = viewPager.getCurrentItem();
+        messageButtonBehaviourOnPageSelected.pageSelected(currentItem);
+        nextButtonBehaviour(currentItem, adapter.getItem(currentItem));
     }
 
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-  }
-
-  @Override public void onBackPressed() {
-    moveBack();
-  }
-
-  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-    switch (keyCode) {
-      case KeyEvent.KEYCODE_DPAD_CENTER:
-        if (messageButtonBehaviours.get(viewPager.getCurrentItem()) != null) {
-          messageButton.performClick();
-        }
-        break;
-      case KeyEvent.KEYCODE_DPAD_RIGHT:
-        int position = viewPager.getCurrentItem();
-        if (adapter.isLastSlide(position) && adapter.getItem(position).canMoveFurther()) {
-          performFinish();
-        } else if (adapter.shouldLockSlide(position)) {
-          errorOccurred(adapter.getItem(position));
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        SlideFragment fragment = adapter.getItem(viewPager.getCurrentItem());
+        boolean hasPermissionToGrant = fragment.hasNeededPermissionsToGrant();
+        if (!hasPermissionToGrant) {
+            viewPager.setSwipingRightAllowed(true);
+            nextButtonBehaviour(viewPager.getCurrentItem(), fragment);
+            messageButtonBehaviourOnPageSelected.pageSelected(viewPager.getCurrentItem());
         } else {
-          viewPager.moveToNextPage();
+            showPermissionsNotGrantedError();
         }
-        break;
-      case KeyEvent.KEYCODE_DPAD_LEFT:
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onBackPressed() {
         moveBack();
-        break;
-      default:
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (messageButtonBehaviours.get(viewPager.getCurrentItem()) != null) {
+                    messageButton.performClick();
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                int position = viewPager.getCurrentItem();
+                if (adapter.isLastSlide(position) && adapter.getItem(position).canMoveFurther()) {
+                    performFinish();
+                } else if (adapter.shouldLockSlide(position)) {
+                    errorOccurred(adapter.getItem(position));
+                } else {
+                    viewPager.moveToNextPage();
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                moveBack();
+                break;
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
         return super.onKeyDown(keyCode, event);
     }
-    return super.onKeyDown(keyCode, event);
-  }
 
-  public void showPermissionsNotGrantedError() {
-    showError(getString(R.string.please_grant_permissions));
-  }
+    public void showPermissionsNotGrantedError() {
+        showError(getString(R.string.please_grant_permissions));
+    }
 
-  /**
-   * Add SlideFragment to IntroScreen
-   *
-   * @param slideFragment Fragment to add
-   */
-  @SuppressWarnings("unused") public void addSlide(SlideFragment slideFragment) {
-    adapter.addItem(slideFragment);
-  }
+    /**
+     * Add SlideFragment to IntroScreen
+     *
+     * @param slideFragment Fragment to add
+     */
+    @SuppressWarnings("unused")
+    public void addSlide(SlideFragment slideFragment) {
+        adapter.addItem(slideFragment);
+    }
 
-  /**
-   * Add SlideFragment to IntroScreen
-   *
-   * @param slideFragment Fragment to add
-   * @param messageButtonBehaviour Add behaviour for message button
-   */
-  @SuppressWarnings("unused") public void addSlide(SlideFragment slideFragment,
-      MessageButtonBehaviour messageButtonBehaviour) {
-    adapter.addItem(slideFragment);
-    messageButtonBehaviours.put(adapter.getLastItemPosition(), messageButtonBehaviour);
-  }
+    /**
+     * Add SlideFragment to IntroScreen
+     *
+     * @param slideFragment          Fragment to add
+     * @param messageButtonBehaviour Add behaviour for message button
+     */
+    @SuppressWarnings("unused")
+    public void addSlide(SlideFragment slideFragment,
+            MessageButtonBehaviour messageButtonBehaviour) {
+        adapter.addItem(slideFragment);
+        messageButtonBehaviours.put(adapter.getLastItemPosition(), messageButtonBehaviour);
+    }
 
-  /**
-   * Set skip button instead of back button
-   */
-  @SuppressWarnings("unused") public void setSkipButtonVisible() {
-    backButton.setVisibility(GONE);
+    /**
+     * Set skip button instead of back button
+     */
+    @SuppressWarnings("unused")
+    public void setSkipButtonVisible() {
+        backButton.setVisibility(GONE);
 
-    skipButton.setVisibility(View.VISIBLE);
-    skipButton.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        for (int position = viewPager.getCurrentItem(); position < adapter.getCount(); position++) {
-          if (!adapter.getItem(position).canMoveFurther()) {
-            viewPager.setCurrentItem(position, true);
-            showError(adapter.getItem(position).cantMoveFurtherErrorMessage());
-            return;
-          }
-        }
-        viewPager.setCurrentItem(adapter.getLastItemPosition(), true);
-      }
-    });
-  }
-
-  /**
-   * Set back button visible
-   */
-  public void setBackButtonVisible() {
-    skipButton.setVisibility(GONE);
-
-    backButton.setVisibility(View.VISIBLE);
-    backButton.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        viewPager.setCurrentItem(viewPager.getPreviousItem(), true);
-      }
-    });
-  }
-
-  /**
-   * Hides any back button
-   */
-  @SuppressWarnings("unused") public void hideBackButton() {
-    backButton.setVisibility(View.INVISIBLE);
-    skipButton.setVisibility(View.GONE);
-  }
-
-  /**
-   * Get translation wrapper for next button
-   *
-   * @return ViewTranslationWrapper
-   */
-  public ViewTranslationWrapper getNextButtonTranslationWrapper() {
-    return nextButtonTranslationWrapper;
-  }
-
-  /**
-   * Get translation wrapper for back button
-   *
-   * @return ViewTranslationWrapper
-   */
-  @SuppressWarnings("unused") public ViewTranslationWrapper getBackButtonTranslationWrapper() {
-    return backButtonTranslationWrapper;
-  }
-
-  /**
-   * Get translation wrapper for page indicator
-   *
-   * @return ViewTranslationWrapper
-   */
-  @SuppressWarnings("unused") public ViewTranslationWrapper getPageIndicatorTranslationWrapper() {
-    return pageIndicatorTranslationWrapper;
-  }
-
-  /**
-   * Get translation wrapper for view pager
-   *
-   * @return ViewTranslationWrapper
-   */
-  @SuppressWarnings("unused") public ViewTranslationWrapper getViewPagerTranslationWrapper() {
-    return viewPagerTranslationWrapper;
-  }
-
-  /**
-   * Get translation wrapper for skip button
-   *
-   * @return ViewTranslationWrapper
-   */
-  @SuppressWarnings("unused") public ViewTranslationWrapper getSkipButtonTranslationWrapper() {
-    return skipButtonTranslationWrapper;
-  }
-
-  /**
-   * Set if last screen should be able to exit with alpha transition
-   *
-   * @param enableAlphaExitTransition should enable alpha exit transition
-   */
-  @SuppressWarnings("unused") public void enableLastSlideAlphaExitTransition(
-      boolean enableAlphaExitTransition) {
-    viewPager.alphaExitTransitionEnabled(enableAlphaExitTransition);
-  }
-
-  /**
-   * Show snackbar message
-   *
-   * @param message Message which will be visible to user
-   */
-  public void showMessage(String message) {
-    showError(message);
-  }
-
-  /**
-   * Override to execute this method on finish intro activity
-   */
-  public void onFinish() {
-  }
-
-  private void initOnPageChangeListeners() {
-    messageButtonBehaviourOnPageSelected =
-        new MessageButtonBehaviourOnPageSelected(messageButton, adapter, messageButtonBehaviours);
-
-    backButtonTranslationWrapper = new BackButtonTranslationWrapper(backButton);
-    pageIndicatorTranslationWrapper = new PageIndicatorTranslationWrapper(pageIndicator);
-    viewPagerTranslationWrapper = new ViewPagerTranslationWrapper(viewPager);
-    skipButtonTranslationWrapper = new SkipButtonTranslationWrapper(skipButton);
-
-    overScrollLayout.registerFinishListener(new IFinishListener() {
-      @Override public void doOnFinish() {
-        performFinish();
-      }
-    });
-
-    viewPager.addOnPageChangeListener(
-        new ViewBehavioursOnPageChangeListener(adapter).registerViewTranslationWrapper(
-            nextButtonTranslationWrapper)
-            .registerViewTranslationWrapper(backButtonTranslationWrapper)
-            .registerViewTranslationWrapper(pageIndicatorTranslationWrapper)
-            .registerViewTranslationWrapper(viewPagerTranslationWrapper)
-            //.registerViewTranslationWrapper(skipButtonTranslationWrapper)
-
-            .registerOnPageScrolled(new IPageScrolledListener() {
-              @Override public void pageScrolled(final int position, float offset) {
-                viewPager.post(new Runnable() {
-                  @Override public void run() {
-                    if (adapter != null
-                        && adapter.getCount() > 0
-                        && position > 0
-                        && (adapter.getItem(position).hasNeededPermissionsToGrant()
-                        || !adapter.getItem(position).canMoveFurther())) {
-                      viewPager.setCurrentItem(position, true);
-                      pageIndicator.clearJoiningFractions();
+        skipButton.setVisibility(View.VISIBLE);
+        skipButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int position = viewPager.getCurrentItem(); position < adapter.getCount(); position++) {
+                    if (!adapter.getItem(position).canMoveFurther()) {
+                        viewPager.setCurrentItem(position, true);
+                        showError(adapter.getItem(position).cantMoveFurtherErrorMessage());
+                        return;
                     }
-                  }
-                });
-              }
-            })
-            .registerOnPageScrolled(new ColorTransitionScrollListener())
-            .registerOnPageScrolled(new ParallaxScrollListener(adapter))
-
-            .registerPageSelectedListener(messageButtonBehaviourOnPageSelected)
-            .registerPageSelectedListener(new IPageSelectedListener() {
-              @Override public void pageSelected(int position) {
-                nextButtonBehaviour(position, adapter.getItem(position));
-
-                if (adapter.shouldFinish(position)) {
-                  performFinish();
                 }
-              }
-            }));
-  }
+                viewPager.setCurrentItem(adapter.getLastItemPosition(), true);
+            }
+        });
+    }
 
-  @SuppressWarnings("PointlessBooleanExpression")
-  private void nextButtonBehaviour(final int position, final SlideFragment fragment) {
-    boolean hasPermissionToGrant = fragment.hasNeededPermissionsToGrant();
-    if (hasPermissionToGrant) {
-      nextButton.setVisibility(View.VISIBLE);
-      nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_next));
-      nextButton.setOnClickListener(permissionNotGrantedClickListener);
-    } else if (adapter.isLastSlide(position)) {
-      nextButton.setVisibility(View.INVISIBLE);
-      //nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_finish));
-      //nextButton.setOnClickListener(finishScreenClickListener);
-    } else {
-      nextButton.setVisibility(View.VISIBLE);
+    /**
+     * Set back button visible
+     */
+    public void setBackButtonVisible() {
+        skipButton.setVisibility(GONE);
 
-      nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_next));
-      nextButton.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-          if (fragment.canMoveFurther() == false) {
-            errorOccurred(fragment);
-          } else {
-            viewPager.moveToNextPage();
-          }
+        backButton.setVisibility(View.VISIBLE);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewPager.setCurrentItem(viewPager.getPreviousItem(), true);
+            }
+        });
+    }
+
+    /**
+     * Hides any back button
+     */
+    @SuppressWarnings("unused")
+    public void hideBackButton() {
+        backButton.setVisibility(View.INVISIBLE);
+        skipButton.setVisibility(View.GONE);
+    }
+
+    /**
+     * Get translation wrapper for next button
+     *
+     * @return ViewTranslationWrapper
+     */
+    public ViewTranslationWrapper getNextButtonTranslationWrapper() {
+        return nextButtonTranslationWrapper;
+    }
+
+    /**
+     * Get translation wrapper for back button
+     *
+     * @return ViewTranslationWrapper
+     */
+    @SuppressWarnings("unused")
+    public ViewTranslationWrapper getBackButtonTranslationWrapper() {
+        return backButtonTranslationWrapper;
+    }
+
+    /**
+     * Get translation wrapper for page indicator
+     *
+     * @return ViewTranslationWrapper
+     */
+    @SuppressWarnings("unused")
+    public ViewTranslationWrapper getPageIndicatorTranslationWrapper() {
+        return pageIndicatorTranslationWrapper;
+    }
+
+    /**
+     * Get translation wrapper for view pager
+     *
+     * @return ViewTranslationWrapper
+     */
+    @SuppressWarnings("unused")
+    public ViewTranslationWrapper getViewPagerTranslationWrapper() {
+        return viewPagerTranslationWrapper;
+    }
+
+    /**
+     * Get translation wrapper for skip button
+     *
+     * @return ViewTranslationWrapper
+     */
+    @SuppressWarnings("unused")
+    public ViewTranslationWrapper getSkipButtonTranslationWrapper() {
+        return skipButtonTranslationWrapper;
+    }
+
+    /**
+     * Set if last screen should be able to exit with alpha transition
+     *
+     * @param enableAlphaExitTransition should enable alpha exit transition
+     */
+    @SuppressWarnings("unused")
+    public void enableLastSlideAlphaExitTransition(
+            boolean enableAlphaExitTransition) {
+        viewPager.alphaExitTransitionEnabled(enableAlphaExitTransition);
+    }
+
+    /**
+     * Show snackbar message
+     *
+     * @param message Message which will be visible to user
+     */
+    public void showMessage(String message) {
+        showError(message);
+    }
+
+    /**
+     * Override to execute this method on finish intro activity
+     */
+    public void onFinish() {
+    }
+
+    private void initOnPageChangeListeners() {
+        messageButtonBehaviourOnPageSelected =
+                new MessageButtonBehaviourOnPageSelected(messageButton, adapter, messageButtonBehaviours);
+
+        backButtonTranslationWrapper = new BackButtonTranslationWrapper(backButton);
+        pageIndicatorTranslationWrapper = new PageIndicatorTranslationWrapper(pageIndicator);
+        viewPagerTranslationWrapper = new ViewPagerTranslationWrapper(viewPager);
+        skipButtonTranslationWrapper = new SkipButtonTranslationWrapper(skipButton);
+
+        overScrollLayout.registerFinishListener(new IFinishListener() {
+            @Override
+            public void doOnFinish() {
+                performFinish();
+            }
+        });
+
+        viewPager.addOnPageChangeListener(
+                new ViewBehavioursOnPageChangeListener(adapter).registerViewTranslationWrapper(
+                        nextButtonTranslationWrapper)
+                        .registerViewTranslationWrapper(backButtonTranslationWrapper)
+                        .registerViewTranslationWrapper(pageIndicatorTranslationWrapper)
+                        .registerViewTranslationWrapper(viewPagerTranslationWrapper)
+                        //.registerViewTranslationWrapper(skipButtonTranslationWrapper)
+
+                        .registerOnPageScrolled(new IPageScrolledListener() {
+                            @Override
+                            public void pageScrolled(final int position, float offset) {
+                                viewPager.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (adapter != null
+                                                && adapter.getCount() > 0
+                                                && position > 0
+                                                && (adapter.getItem(position).hasNeededPermissionsToGrant()
+                                                || !adapter.getItem(position).canMoveFurther())) {
+                                            viewPager.setCurrentItem(position, true);
+                                            pageIndicator.clearJoiningFractions();
+                                        }
+                                    }
+                                });
+                            }
+                        })
+                        .registerOnPageScrolled(new ColorTransitionScrollListener())
+                        .registerOnPageScrolled(new ParallaxScrollListener(adapter))
+
+                        .registerPageSelectedListener(messageButtonBehaviourOnPageSelected)
+                        .registerPageSelectedListener(new IPageSelectedListener() {
+                            @Override
+                            public void pageSelected(int position) {
+                                nextButtonBehaviour(position, adapter.getItem(position));
+
+                                if (adapter.shouldFinish(position)) {
+                                    performFinish();
+                                }
+                            }
+                        }));
+    }
+
+    @SuppressWarnings("PointlessBooleanExpression")
+    private void nextButtonBehaviour(final int position, final SlideFragment fragment) {
+        boolean hasPermissionToGrant = fragment.hasNeededPermissionsToGrant();
+        if (hasPermissionToGrant) {
+            nextButton.setVisibility(View.VISIBLE);
+            nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_next));
+            nextButton.setOnClickListener(permissionNotGrantedClickListener);
+        } else if (adapter.isLastSlide(position)) {
+            nextButton.setVisibility(View.INVISIBLE);
+            //nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_finish));
+            //nextButton.setOnClickListener(finishScreenClickListener);
+        } else {
+            nextButton.setVisibility(View.VISIBLE);
+
+            nextButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_next));
+            nextButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (fragment.canMoveFurther() == false) {
+                        errorOccurred(fragment);
+                    } else {
+                        viewPager.moveToNextPage();
+                    }
+                }
+            });
         }
-      });
     }
-  }
 
-  private void performFinish() {
-    onFinish();
-    finish();
-  }
-
-  private void moveBack() {
-    if (viewPager.getCurrentItem() == 0) {
-      finish();
-    } else {
-      viewPager.setCurrentItem(viewPager.getPreviousItem(), true);
+    private void performFinish() {
+        onFinish();
+        finish();
     }
-  }
 
-  private void errorOccurred(SlideFragment slideFragment) {
-    nextButtonTranslationWrapper.error();
-    showError(slideFragment.cantMoveFurtherErrorMessage());
-  }
+    private void moveBack() {
+        if (viewPager.getCurrentItem() == 0) {
+            finish();
+        } else {
+            viewPager.setCurrentItem(viewPager.getPreviousItem(), true);
+        }
+    }
 
-  private void showError(String error) {
-    Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT)
-        .setCallback(new Snackbar.Callback() {
-          @Override public void onDismissed(Snackbar snackbar, int event) {
-            navigationView.setTranslationY(0f);
-            super.onDismissed(snackbar, event);
-          }
-        })
-        .show();
-  }
+    private void errorOccurred(SlideFragment slideFragment) {
+        nextButtonTranslationWrapper.error();
+        showError(slideFragment.cantMoveFurtherErrorMessage());
+    }
 
-  private Integer getBackgroundColor(int position, float positionOffset) {
-    return (Integer) argbEvaluator.evaluate(positionOffset,
-        adapter.getItem(position).backgroundColor(),
-        adapter.getItem(position + 1).backgroundColor());
-  }
+    private void showError(String error) {
+        Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT)
+                .setCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        navigationView.setTranslationY(0f);
+                        super.onDismissed(snackbar, event);
+                    }
+                })
+                .show();
+    }
 
-  private Integer getButtonsColor(int position, float positionOffset) {
-    return (Integer) argbEvaluator.evaluate(positionOffset,
-        adapter.getItem(position).buttonsColor(), adapter.getItem(position + 1).buttonsColor());
-  }
+    private Integer getBackgroundColor(int position, float positionOffset) {
+        return (Integer) argbEvaluator.evaluate(positionOffset,
+                adapter.getItem(position).backgroundColor(),
+                adapter.getItem(position + 1).backgroundColor());
+    }
+
+    private Integer getButtonsColor(int position, float positionOffset) {
+        return (Integer) argbEvaluator.evaluate(positionOffset,
+                adapter.getItem(position).buttonsColor(), adapter.getItem(position + 1).buttonsColor());
+    }
 
     /*private int color(@ColorRes int color) {
         return ContextCompat.getColor(this, color);
     }*/
 
-  private class ColorTransitionScrollListener implements IPageScrolledListener {
-    @Override public void pageScrolled(int position, float offset) {
-      if (position < adapter.getCount() - 1) {
-        setViewsColor(position, offset);
-      } else if (adapter.getCount() == 1) {
-        viewPager.setBackgroundColor(adapter.getItem(position).backgroundColor());
-        //messageButton.setTextColor(adapter.getItem(position).backgroundColor());
+    private class ColorTransitionScrollListener implements IPageScrolledListener {
 
-        tintButtons(ColorStateList.valueOf(adapter.getItem(position).buttonsColor()));
-      }
-    }
+        @Override
+        public void pageScrolled(int position, float offset) {
+            if (position < adapter.getCount() - 1) {
+                setViewsColor(position, offset);
+            } else if (adapter.getCount() == 1) {
+                viewPager.setBackgroundColor(adapter.getItem(position).backgroundColor());
+                //messageButton.setTextColor(adapter.getItem(position).backgroundColor());
 
-    private void setViewsColor(int position, float offset) {
-      int backgroundColor = getBackgroundColor(position, offset);
-      viewPager.setBackgroundColor(backgroundColor);
-      //messageButton.setTextColor(backgroundColor);
+                tintButtons(ColorStateList.valueOf(adapter.getItem(position).buttonsColor()));
+            }
+        }
 
-      int buttonsColor = getButtonsColor(position, offset);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        private void setViewsColor(int position, float offset) {
+            int backgroundColor = getBackgroundColor(position, offset);
+            viewPager.setBackgroundColor(backgroundColor);
+            //messageButton.setTextColor(backgroundColor);
+
+            int buttonsColor = getButtonsColor(position, offset);
+      /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         getWindow().setStatusBarColor(buttonsColor);
-      }
-      pageIndicator.setPageIndicatorColor(buttonsColor);
+      }*/
+            pageIndicator.setPageIndicatorColor(buttonsColor);
 
-      tintButtons(ColorStateList.valueOf(buttonsColor));
+            tintButtons(ColorStateList.valueOf(buttonsColor));
+        }
+
+        private void tintButtons(ColorStateList color) {
+            ViewCompat.setBackgroundTintList(nextButton, color);
+            ViewCompat.setBackgroundTintList(backButton, color);
+            //ViewCompat.setBackgroundTintList(skipButton, color);
+        }
     }
 
-    private void tintButtons(ColorStateList color) {
-      ViewCompat.setBackgroundTintList(nextButton, color);
-      ViewCompat.setBackgroundTintList(backButton, color);
-      //ViewCompat.setBackgroundTintList(skipButton, color);
-    }
-  }
+    private class FinishScreenClickListener implements View.OnClickListener {
 
-  private class FinishScreenClickListener implements View.OnClickListener {
-    @Override public void onClick(View v) {
-      SlideFragment slideFragment = adapter.getItem(adapter.getLastItemPosition());
-      if (!slideFragment.canMoveFurther()) {
-        errorOccurred(slideFragment);
-      } else {
-        performFinish();
-      }
+        @Override
+        public void onClick(View v) {
+            SlideFragment slideFragment = adapter.getItem(adapter.getLastItemPosition());
+            if (!slideFragment.canMoveFurther()) {
+                errorOccurred(slideFragment);
+            } else {
+                performFinish();
+            }
+        }
     }
-  }
 }

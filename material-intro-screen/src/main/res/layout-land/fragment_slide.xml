@@ -8,7 +8,7 @@
     android:layout_marginTop="16dp"
     android:baselineAligned="false"
     android:clipToPadding="false"
-    android:fitsSystemWindows="false"
+    android:fitsSystemWindows="true"
     android:padding="16dp">
 
     <ImageView

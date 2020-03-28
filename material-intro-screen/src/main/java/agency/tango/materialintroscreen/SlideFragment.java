@@ -6,12 +6,16 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnApplyWindowInsetsListener;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
@@ -20,195 +24,231 @@ import java.util.Collections;
 import java.util.List;
 
 public class SlideFragment extends ParallaxFragment {
-  private final static String BACKGROUND_COLOR = "background_color";
-  private final static String BACKGROUND_COLOR_RES = "background_color_res";
-  private static final String BUTTONS_COLOR = "buttons_color";
-  private static final String BUTTONS_COLOR_RES = "buttons_color_res";
-  private static final String TITLE = "title";
-  private static final String DESCRIPTION = "description";
-  private static final String NEEDED_PERMISSIONS = "needed_permission";
-  private static final String POSSIBLE_PERMISSIONS = "possible_permission";
-  private static final String IMAGE_RES = "image_res";
-  private static final String IMAGE_URL = "image_url";
-  private static final int PERMISSIONS_REQUEST_CODE = 15621;
 
-  private int backgroundColorResId;
-  private int backgroundColor;
+    private final static String BACKGROUND_COLOR = "background_color";
 
-  private int buttonsColor;
-  private int buttonsColorResId;
+    private final static String BACKGROUND_COLOR_RES = "background_color_res";
 
-  private int imageResId;
-  private String imageUrl;
+    private static final String BUTTONS_COLOR = "buttons_color";
 
-  private String title;
-  private String description;
-  private String[] neededPermissions;
-  private String[] possiblePermissions;
+    private static final String BUTTONS_COLOR_RES = "buttons_color_res";
 
-  private TextView titleTextView;
-  private TextView descriptionTextView;
-  private ImageView imageView;
+    private static final String TITLE = "title";
 
-  public static SlideFragment createInstance(SlideFragmentBuilder builder) {
-    SlideFragment slideFragment = new SlideFragment();
+    private static final String DESCRIPTION = "description";
 
-    Bundle bundle = new Bundle();
+    private static final String NEEDED_PERMISSIONS = "needed_permission";
 
-    bundle.putInt(BACKGROUND_COLOR, builder.backgroundColor);
-    bundle.putInt(BACKGROUND_COLOR_RES, builder.backgroundColorResId);
+    private static final String POSSIBLE_PERMISSIONS = "possible_permission";
 
-    bundle.putInt(BUTTONS_COLOR, builder.buttonsColor);
-    bundle.putInt(BUTTONS_COLOR_RES, builder.buttonsColorResId);
+    private static final String IMAGE_RES = "image_res";
 
-    bundle.putInt(IMAGE_RES, builder.imageResId);
-    bundle.putString(IMAGE_URL, builder.imageUrl);
+    private static final String IMAGE_URL = "image_url";
 
-    bundle.putString(TITLE, builder.title);
-    bundle.putString(DESCRIPTION, builder.description);
-    bundle.putStringArray(NEEDED_PERMISSIONS, builder.neededPermissions);
-    bundle.putStringArray(POSSIBLE_PERMISSIONS, builder.possiblePermissions);
+    private static final int PERMISSIONS_REQUEST_CODE = 15621;
 
-    slideFragment.setArguments(bundle);
-    return slideFragment;
-  }
+    private int backgroundColorResId;
 
-  public static boolean isNotNullOrEmpty(String string) {
-    return string != null && !string.isEmpty();
-  }
+    private int backgroundColor;
 
-  @Nullable @Override
-  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_slide, container, false);
-    titleTextView = (TextView) view.findViewById(R.id.txt_title_slide);
-    descriptionTextView = (TextView) view.findViewById(R.id.txt_description_slide);
-    imageView = (ImageView) view.findViewById(R.id.image_slide);
-    initializeView();
+    private int buttonsColor;
 
-    titleTextView.setTextColor(buttonsColor());
-    descriptionTextView.setTextColor(buttonsColor());
-    return view;
-  }
+    private int buttonsColorResId;
 
-  public void initializeView() {
-    Bundle bundle = getArguments();
+    private int imageResId;
 
-    backgroundColorResId = bundle.getInt(BACKGROUND_COLOR_RES);
-    buttonsColorResId = bundle.getInt(BUTTONS_COLOR_RES);
+    private String imageUrl;
 
-    backgroundColor = bundle.getInt(BACKGROUND_COLOR);
-    buttonsColor = bundle.getInt(BUTTONS_COLOR);
+    private String title;
 
-    imageResId = bundle.getInt(IMAGE_RES, 0);
-    imageUrl = bundle.getString(IMAGE_URL);
+    private String description;
 
-    title = bundle.getString(TITLE);
-    description = bundle.getString(DESCRIPTION);
-    neededPermissions = bundle.getStringArray(NEEDED_PERMISSIONS);
-    possiblePermissions = bundle.getStringArray(POSSIBLE_PERMISSIONS);
+    private String[] neededPermissions;
 
-    updateViewWithValues();
-  }
+    private String[] possiblePermissions;
 
-  public int backgroundColor() {
-    if (backgroundColorResId != 0) {
-      return ContextCompat.getColor(getActivity(), backgroundColorResId);
-    } else {
-      return backgroundColor;
+    private TextView titleTextView;
+
+    private TextView descriptionTextView;
+
+    private ImageView imageView;
+
+    public static SlideFragment createInstance(SlideFragmentBuilder builder) {
+        SlideFragment slideFragment = new SlideFragment();
+
+        Bundle bundle = new Bundle();
+
+        bundle.putInt(BACKGROUND_COLOR, builder.backgroundColor);
+        bundle.putInt(BACKGROUND_COLOR_RES, builder.backgroundColorResId);
+
+        bundle.putInt(BUTTONS_COLOR, builder.buttonsColor);
+        bundle.putInt(BUTTONS_COLOR_RES, builder.buttonsColorResId);
+
+        bundle.putInt(IMAGE_RES, builder.imageResId);
+        bundle.putString(IMAGE_URL, builder.imageUrl);
+
+        bundle.putString(TITLE, builder.title);
+        bundle.putString(DESCRIPTION, builder.description);
+        bundle.putStringArray(NEEDED_PERMISSIONS, builder.neededPermissions);
+        bundle.putStringArray(POSSIBLE_PERMISSIONS, builder.possiblePermissions);
+
+        slideFragment.setArguments(bundle);
+        return slideFragment;
     }
-  }
 
-  public int buttonsColor() {
-    if (buttonsColorResId != 0) {
-      return ContextCompat.getColor(getActivity(), buttonsColorResId);
-    } else {
-      return buttonsColor;
+    public static boolean isNotNullOrEmpty(String string) {
+        return string != null && !string.isEmpty();
     }
-  }
 
-  public boolean hasAnyPermissionsToGrant() {
-    boolean hasPermissionToGrant = hasPermissionsToGrant(neededPermissions);
-    if (!hasPermissionToGrant) {
-      hasPermissionToGrant = hasPermissionsToGrant(possiblePermissions);
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
-    return hasPermissionToGrant;
-  }
 
-  public boolean hasNeededPermissionsToGrant() {
-    return hasPermissionsToGrant(neededPermissions);
-  }
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.fragment_slide, container, false);
+        ViewCompat.requestApplyInsets(view);
 
-  public boolean canMoveFurther() {
-    return true;
-  }
+        titleTextView = (TextView) view.findViewById(R.id.txt_title_slide);
+        descriptionTextView = (TextView) view.findViewById(R.id.txt_description_slide);
+        imageView = (ImageView) view.findViewById(R.id.image_slide);
+        initializeView();
 
-  public String cantMoveFurtherErrorMessage() {
-    return getString(R.string.impassable_slide);
-  }
+        titleTextView.setTextColor(buttonsColor());
+        descriptionTextView.setTextColor(buttonsColor());
 
-  private void updateViewWithValues() {
-    titleTextView.setText(title);
-    descriptionTextView.setText(description);
-
-    if (imageResId != 0) {
-      imageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageResId));
-      imageView.setVisibility(View.VISIBLE);
-    } else if (!TextUtils.isEmpty(imageUrl)) {
-      Glide.with(this).load(imageUrl)
-          //.apply(RequestOptions.centerCropTransform().error(new ColorDrawable(Color.RED)).placeholder(new ColorDrawable(Color.GRAY)))
-          .apply(RequestOptions.centerInsideTransform())
-          .transition(DrawableTransitionOptions.withCrossFade())
-          .into(imageView);
+        ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(final View v, final WindowInsetsCompat insets) {
+                view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(),
+                        view.getPaddingBottom() + insets.getStableInsetBottom());
+                return insets;
+            }
+        });
+        return view;
     }
-  }
 
-  public void askForPermissions() {
-    ArrayList<String> notGrantedPermissions = new ArrayList<>();
+    public void initializeView() {
+        Bundle bundle = getArguments();
 
-    if (neededPermissions != null) {
-      for (String permission : neededPermissions) {
-        if (isNotNullOrEmpty(permission)) {
-          if (ContextCompat.checkSelfPermission(getContext(), permission)
-              != PackageManager.PERMISSION_GRANTED) {
-            notGrantedPermissions.add(permission);
-          }
+        backgroundColorResId = bundle.getInt(BACKGROUND_COLOR_RES);
+        buttonsColorResId = bundle.getInt(BUTTONS_COLOR_RES);
+
+        backgroundColor = bundle.getInt(BACKGROUND_COLOR);
+        buttonsColor = bundle.getInt(BUTTONS_COLOR);
+
+        imageResId = bundle.getInt(IMAGE_RES, 0);
+        imageUrl = bundle.getString(IMAGE_URL);
+
+        title = bundle.getString(TITLE);
+        description = bundle.getString(DESCRIPTION);
+        neededPermissions = bundle.getStringArray(NEEDED_PERMISSIONS);
+        possiblePermissions = bundle.getStringArray(POSSIBLE_PERMISSIONS);
+
+        updateViewWithValues();
+    }
+
+    public int backgroundColor() {
+        if (backgroundColorResId != 0) {
+            return ContextCompat.getColor(getActivity(), backgroundColorResId);
+        } else {
+            return backgroundColor;
         }
-      }
     }
-    if (possiblePermissions != null) {
-      for (String permission : possiblePermissions) {
-        if (isNotNullOrEmpty(permission)) {
-          if (ContextCompat.checkSelfPermission(getContext(), permission)
-              != PackageManager.PERMISSION_GRANTED) {
-            notGrantedPermissions.add(permission);
-          }
+
+    public int buttonsColor() {
+        if (buttonsColorResId != 0) {
+            return ContextCompat.getColor(getActivity(), buttonsColorResId);
+        } else {
+            return buttonsColor;
         }
-      }
     }
 
-    String[] permissionsToGrant = removeEmptyAndNullStrings(notGrantedPermissions);
-    ActivityCompat.requestPermissions(getActivity(), permissionsToGrant, PERMISSIONS_REQUEST_CODE);
-  }
-
-  private boolean hasPermissionsToGrant(String[] permissions) {
-    if (permissions != null) {
-      for (String permission : permissions) {
-        if (isNotNullOrEmpty(permission)) {
-          if (ContextCompat.checkSelfPermission(getContext(), permission)
-              != PackageManager.PERMISSION_GRANTED) {
-            return true;
-          }
+    public boolean hasAnyPermissionsToGrant() {
+        boolean hasPermissionToGrant = hasPermissionsToGrant(neededPermissions);
+        if (!hasPermissionToGrant) {
+            hasPermissionToGrant = hasPermissionsToGrant(possiblePermissions);
         }
-      }
+        return hasPermissionToGrant;
     }
-    return false;
-  }
 
-  @SuppressWarnings("SuspiciousMethodCalls")
-  private String[] removeEmptyAndNullStrings(final ArrayList<String> permissions) {
-    List<String> list = new ArrayList<>(permissions);
-    list.removeAll(Collections.singleton(null));
-    return list.toArray(new String[list.size()]);
-  }
+    public boolean hasNeededPermissionsToGrant() {
+        return hasPermissionsToGrant(neededPermissions);
+    }
+
+    public boolean canMoveFurther() {
+        return true;
+    }
+
+    public String cantMoveFurtherErrorMessage() {
+        return getString(R.string.impassable_slide);
+    }
+
+    private void updateViewWithValues() {
+        titleTextView.setText(title);
+        descriptionTextView.setText(description);
+
+        if (imageResId != 0) {
+            imageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageResId));
+            imageView.setVisibility(View.VISIBLE);
+        } else if (!TextUtils.isEmpty(imageUrl)) {
+            Glide.with(this).load(imageUrl)
+                    //.apply(RequestOptions.centerCropTransform().error(new ColorDrawable(Color.RED)).placeholder(new ColorDrawable(Color.GRAY)))
+                    .apply(RequestOptions.centerInsideTransform())
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(imageView);
+        }
+    }
+
+    public void askForPermissions() {
+        ArrayList<String> notGrantedPermissions = new ArrayList<>();
+
+        if (neededPermissions != null) {
+            for (String permission : neededPermissions) {
+                if (isNotNullOrEmpty(permission)) {
+                    if (ContextCompat.checkSelfPermission(getContext(), permission)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        notGrantedPermissions.add(permission);
+                    }
+                }
+            }
+        }
+        if (possiblePermissions != null) {
+            for (String permission : possiblePermissions) {
+                if (isNotNullOrEmpty(permission)) {
+                    if (ContextCompat.checkSelfPermission(getContext(), permission)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        notGrantedPermissions.add(permission);
+                    }
+                }
+            }
+        }
+
+        String[] permissionsToGrant = removeEmptyAndNullStrings(notGrantedPermissions);
+        ActivityCompat.requestPermissions(getActivity(), permissionsToGrant, PERMISSIONS_REQUEST_CODE);
+    }
+
+    private boolean hasPermissionsToGrant(String[] permissions) {
+        if (permissions != null) {
+            for (String permission : permissions) {
+                if (isNotNullOrEmpty(permission)) {
+                    if (ContextCompat.checkSelfPermission(getContext(), permission)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private String[] removeEmptyAndNullStrings(final ArrayList<String> permissions) {
+        List<String> list = new ArrayList<>(permissions);
+        list.removeAll(Collections.singleton(null));
+        return list.toArray(new String[list.size()]);
+    }
 }
